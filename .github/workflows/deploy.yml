@@ -1,0 +1,39 @@
+name: Deploy to Yandex Cloud VPS
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+    
+    - name: Deploy to VPS
+      uses: appleboy/ssh-action@v1.0.0
+      with:
+        host: 84.201.150.6
+        username: yc-user
+        key: ${{ secrets.YC_SSH_KEY }}
+        script: |
+          cd /apps/neurocreatives
+          
+          # Обновление кода
+          git pull origin main
+          
+          # Перезапуск Docker контейнера
+          docker-compose down
+          docker-compose build --no-cache
+          docker-compose up -d
+          
+          # Очистка старых образов
+          docker system prune -f
+          
+          echo "✅ Deployment completed!"
+          
+          # Показать статус
+          docker-compose ps
