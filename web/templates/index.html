@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Neurocreatives – Платформа рекламных креативов</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Шапка -->
+    <header class="header">
+        <div class="header-content">
+            <div class="logo">
+                <h1>Neurocreatives</h1>
+                <span class="logo-subtitle">AI-powered креативная аналитика</span>
+            </div>
+            <div class="header-actions">
+                <button id="btnRunParser" class="btn btn-primary">
+                    <span class="btn-icon">📡</span>
+                    Запустить парсер
+                </button>
+                <button id="btnRunAnalysis" class="btn btn-secondary">
+                    <span class="btn-icon">🔍</span>
+                    Запустить анализ
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Основной контейнер -->
+    <div class="container">
+        <!-- Сайдбар -->
+        <aside class="sidebar">
+            <div class="sidebar-section">
+                <h3 class="sidebar-title">Статистика</h3>
+                <div class="stat-item">
+                    <span class="stat-label">Постов</span>
+                    <span id="statPosts" class="stat-value">0</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Изображений</span>
+                    <span id="statImages" class="stat-value">0</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Проанализировано</span>
+                    <span id="statAnalyzed" class="stat-value">0</span>
+                </div>
+            </div>
+
+            <div class="sidebar-section">
+                <h3 class="sidebar-title">Каналы</h3>
+                <div id="channelsList" class="channels-list">
+                    <div class="loading">Загрузка...</div>
+                </div>
+            </div>
+
+            <div class="sidebar-section">
+                <h3 class="sidebar-title">Статус задач</h3>
+                <div class="status-item">
+                    <div class="status-label">Парсер</div>
+                    <div id="parserStatus" class="status-value">Готов</div>
+                </div>
+                <div class="status-item">
+                    <div class="status-label">Анализ</div>
+                    <div id="analysisStatus" class="status-value">Готов</div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Фид креативов -->
+        <main class="feed">
+            <div class="feed-header">
+                <h2>Креативы</h2>
+                <div class="feed-controls">
+                    <button id="btnRefresh" class="btn btn-icon-only">
+                        <span>↻</span>
+                    </button>
+                </div>
+            </div>
+
+            <div id="creativesGrid" class="creatives-grid">
+                <div class="loading">Загрузка креативов...</div>
+            </div>
+
+            <div id="loadMoreContainer" class="load-more-container" style="display: none;">
+                <button id="btnLoadMore" class="btn btn-secondary">Загрузить еще</button>
+            </div>
+        </main>
+
+        <!-- Панель деталей -->
+        <aside id="detailPanel" class="detail-panel">
+            <div class="detail-panel-content">
+                <button id="btnCloseDetail" class="btn-close">✕</button>
+                <div id="detailContent">
+                    <div class="detail-placeholder">
+                        Выберите креатив для просмотра деталей
+                    </div>
+                </div>
+            </div>
+        </aside>
+    </div>
+
+    <script src="/static/app.js"></script>
+</body>
+</html>
