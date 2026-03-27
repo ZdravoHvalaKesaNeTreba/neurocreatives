@@ -20,17 +20,11 @@ jobs:
         username: yc-user
         key: ${{ secrets.YC_SSH_KEY }}
         script: |
+          set -e
           cd /apps/neurocreatives
-          
-          # Обновление кода
           git pull origin main
-          
-          # Перезапуск Docker контейнера
-          docker-compose down
-          docker-compose build --no-cache
-          docker-compose up -d
-          
-          # Очистка старых образов
+          docker compose build --no-cache
+          docker compose up -d
           docker system prune -f
-          
+          docker compose ps
           echo "✅ Deployment completed!"
