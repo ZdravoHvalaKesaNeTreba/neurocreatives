@@ -26,14 +26,11 @@ jobs:
           git pull origin main
           
           # Перезапуск Docker контейнера
-          docker compose down
-          docker compose build --no-cache
-          docker compose up -d
+          docker-compose down
+          docker-compose build --no-cache
+          docker-compose up -d
           
           # Очистка старых образов
           docker system prune -f
           
           echo "✅ Deployment completed!"
-          
-          # Показать статус
-          docker compose ps
