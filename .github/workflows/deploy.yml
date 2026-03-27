@@ -26,6 +26,8 @@ jobs:
           docker compose down --remove-orphans
           docker stop neurocreatives 2>/dev/null || true
           docker rm neurocreatives 2>/dev/null || true
+          docker ps -q --filter "publish=8000" | xargs -r docker stop
+          docker ps -aq --filter "publish=8000" | xargs -r docker rm
           docker compose build --no-cache
           docker compose up -d
           docker system prune -f
