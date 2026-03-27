@@ -20,14 +20,20 @@ jobs:
         username: yc-user
         key: ${{ secrets.YC_SSH_KEY }}
         script: |
-          set -e
           cd /apps/neurocreatives
           git pull origin main
-          docker compose down --remove-orphans
+          
+          # Остановка всего на порту 8000
+          docker compose down --remove-orphans 2>/dev/null || true
           docker stop neurocreatives 2>/dev/null || true
           docker rm neurocreatives 2>/dev/null || true
-          docker ps -q --filter "publish=8000" | xargs -r docker stop
-          docker ps -aq --filter "publish=8000" | xargs -r docker rm
+          docker ps -q --filter "publish=8000" | xargs -r docker stop 2>/dev/null || true
+          docker ps -aq --filter "publish=8000" | xargs -r docker rm 2>/dev/null || true
+          sudo fuser -k 8000/tcp 2>/dev/null || true
+          sleep 2
+          
+          # Сборка и запуск
+          set -e
           docker compose build --no-cache
           docker compose up -d
           docker system prune -f
