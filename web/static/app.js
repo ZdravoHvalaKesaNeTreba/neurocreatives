@@ -175,7 +175,9 @@ async function saveScheduleSettings() {
             // Перезагружаем настройки для обновления статуса
             setTimeout(() => loadScheduleSettings(), 500);
         } else {
-            alert('Ошибка: ' + (result.detail || 'Не удалось сохранить'));
+            const detail = result.detail;
+            const errorMsg = typeof detail === 'string' ? detail : (Array.isArray(detail) ? detail.map(e => e.msg || JSON.stringify(e)).join('; ') : JSON.stringify(detail));
+            alert('Ошибка: ' + (errorMsg || 'Не удалось сохранить'));
         }
     } catch (error) {
         console.error('Ошибка при сохранении настроек планировщика:', error);
@@ -941,7 +943,10 @@ async function saveSettings() {
             });
             
             if (!channelsResponse.ok) {
-                throw new Error('Ошибка сохранения каналов');
+                const chErr = await channelsResponse.json().catch(() => ({}));
+                const chDetail = chErr.detail;
+                const chMsg = typeof chDetail === 'string' ? chDetail : (Array.isArray(chDetail) ? chDetail.map(e => e.msg || JSON.stringify(e)).join('; ') : JSON.stringify(chDetail));
+                throw new Error(chMsg || 'Ошибка сохранения каналов');
             }
         }
         
@@ -966,7 +971,9 @@ async function saveSettings() {
             closeSettingsModal();
             loadStats(); // Обновляем список каналов в сайдбаре
         } else {
-            alert(`Ошибка: ${settingsData.detail}`);
+            const sDetail = settingsData.detail;
+            const sMsg = typeof sDetail === 'string' ? sDetail : (Array.isArray(sDetail) ? sDetail.map(e => e.msg || JSON.stringify(e)).join('; ') : JSON.stringify(sDetail));
+            alert(`Ошибка: ${sMsg || 'Не удалось сохранить настройки'}`);
         }
         
     } catch (error) {

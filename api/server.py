@@ -1,5 +1,5 @@
 import asyncio
-from fastapi import FastAPI, Depends, BackgroundTasks, HTTPException, Body
+from fastapi import FastAPI, Depends, BackgroundTasks, HTTPException
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from fastapi.responses import HTMLResponse, JSONResponse, StreamingResponse
@@ -473,7 +473,7 @@ async def get_channels():
 
 
 @app.post("/api/channels")
-async def update_channels(channels: List[str] = Body(...)):
+async def update_channels(request: Request):
     """
     Обновление списка каналов для парсинга.
     
@@ -481,6 +481,8 @@ async def update_channels(channels: List[str] = Body(...)):
         channels: Список алиасов каналов (без @)
     """
     try:
+        channels = await request.json()
+        
         # Обновляем глобальную переменную
         config.CHANNELS_TO_PARSE = [ch.strip() for ch in channels if ch.strip()]
         
@@ -536,7 +538,7 @@ async def get_settings(db: Session = Depends(get_db_session)):
 
 
 @app.post("/api/settings")
-async def update_settings(settings_data: dict, db: Session = Depends(get_db_session)):
+async def update_settings(request: Request, db: Session = Depends(get_db_session)):
     """
     Обновление настроек.
     
@@ -544,6 +546,8 @@ async def update_settings(settings_data: dict, db: Session = Depends(get_db_sess
         settings_data: Словарь с настройками {key: value}
     """
     try:
+        settings_data = await request.json()
+        
         for key, value in settings_data.items():
             # Ищем существующую настройку
             setting = db.query(Settings).filter(Settings.key == key).first()
@@ -685,7 +689,7 @@ async def get_schedule(db: Session = Depends(get_db_session)):
 
 
 @app.post("/api/schedule")
-async def update_schedule(schedule_data: Dict[str, Any], db: Session = Depends(get_db_session)):
+async def update_schedule(request: Request, db: Session = Depends(get_db_session)):
     """
     Обновить настройки расписания.
     
@@ -699,6 +703,8 @@ async def update_schedule(schedule_data: Dict[str, Any], db: Session = Depends(g
             - end_date: str (ISO формат, опционально)
     """
     try:
+        schedule_data = await request.json()
+        
         # Логируем полученные данные
         logger.info(f"📥 Получены данные расписания: {schedule_data}")
         add_log("INFO", f"📥 Получены данные расписания: {schedule_data}")
