@@ -151,6 +151,12 @@ async def shutdown_event():
     logger.info("✓ Приложение остановлено")
 
 
+@app.get("/api/debug-version")
+async def debug_version():
+    """Диагностический эндпоинт для проверки версии кода на сервере."""
+    return {"version": "82b07fc-fix-request-json", "timestamp": "2026-03-29T15:24"}
+
+
 @app.get("/", response_class=HTMLResponse)
 async def index(request: Request):
     """Главная страница."""
