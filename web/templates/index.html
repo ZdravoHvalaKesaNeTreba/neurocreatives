@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Neurocreatives – Платформа рекламных креативов</title>
+    <link rel="icon" type="image/png" href="/static/favicon.png">
     <link rel="stylesheet" href="/static/style.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -18,6 +19,10 @@
                 <span class="logo-subtitle">AI-powered креативная аналитика</span>
             </div>
             <div class="header-actions">
+                <button id="btnSettings" class="btn btn-accent">
+                    <span class="btn-icon">⚙️</span>
+                    Настройки
+                </button>
                 <button id="btnRunParser" class="btn btn-primary">
                     <span class="btn-icon">📡</span>
                     Запустить парсер
@@ -30,65 +35,523 @@
         </div>
     </header>
 
+    <!-- Навигационные вкладки -->
+    <div class="tabs-container">
+        <div class="tabs">
+            <button class="tab active" data-tab="gallery">Галерея</button>
+            <button class="tab" data-tab="table">Таблица</button>
+            <button class="tab" data-tab="logs">Логи</button>
+            <button class="tab" data-tab="guide">📖 Руководство</button>
+        </div>
+        <div class="tabs-stats">
+            <div class="tab-stat">
+                <span class="tab-stat-label">Постов:</span>
+                <span id="headerStatPosts" class="tab-stat-value">0</span>
+            </div>
+            <div class="tab-stat">
+                <span class="tab-stat-label">Изображений:</span>
+                <span id="headerStatImages" class="tab-stat-value">0</span>
+            </div>
+            <div class="tab-stat">
+                <span class="tab-stat-label">Проанализировано:</span>
+                <span id="headerStatAnalyzed" class="tab-stat-value">0</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Блок фильтров -->
+    <div id="filtersBar" class="filters-bar">
+        <div class="filters-content">
+            <div class="filter-group">
+                <label class="filter-label">Канал</label>
+                <select id="filterChannel" class="filter-select">
+                    <option value="">Все каналы</option>
+                </select>
+            </div>
+            <div class="filter-group filter-group-with-hint">
+                <div class="filter-field">
+                    <label class="filter-label">ER от</label>
+                    <input type="number" id="filterERMin" class="filter-input" placeholder="0" step="0.1">
+                </div>
+                <div class="filter-hint">
+                    <span class="filter-hint-icon">📊</span>
+                    <span class="filter-hint-label">Средний:</span>
+                    <span id="avgER" class="filter-hint-value">0%</span>
+                </div>
+            </div>
+            <div class="filter-group">
+                <label class="filter-label">ER до</label>
+                <input type="number" id="filterERMax" class="filter-input" placeholder="100" step="0.1">
+            </div>
+            <div class="filter-group filter-group-with-hint">
+                <div class="filter-field">
+                    <label class="filter-label">Просмотров от</label>
+                    <input type="number" id="filterViewsMin" class="filter-input" placeholder="0">
+                </div>
+                <div class="filter-hint">
+                    <span class="filter-hint-icon">👁️</span>
+                    <span class="filter-hint-label">Средние:</span>
+                    <span id="avgViews" class="filter-hint-value">0</span>
+                </div>
+            </div>
+            <div class="filter-group">
+                <label class="filter-label">Просмотров до</label>
+                <input type="number" id="filterViewsMax" class="filter-input" placeholder="∞">
+            </div>
+            <div class="filter-actions">
+                <button id="btnApplyFilters" class="btn btn-primary">Применить</button>
+                <button id="btnResetFilters" class="btn btn-secondary">Сбросить</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Основной контейнер -->
     <div class="container">
-        <!-- Сайдбар -->
-        <aside class="sidebar">
-            <div class="sidebar-section">
-                <h3 class="sidebar-title">Статистика</h3>
-                <div class="stat-item">
-                    <span class="stat-label">Постов</span>
-                    <span id="statPosts" class="stat-value">0</span>
+        <!-- Представление галереи -->
+        <div id="galleryView" class="view-container active">
+            <!-- Сайдбар -->
+            <aside class="sidebar">
+                <div class="sidebar-section">
+                    <h3 class="sidebar-title">Статистика</h3>
+                    <div class="stat-item">
+                        <span class="stat-label">Постов</span>
+                        <span id="statPosts" class="stat-value">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Изображений</span>
+                        <span id="statImages" class="stat-value">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Проанализировано</span>
+                        <span id="statAnalyzed" class="stat-value">0</span>
+                    </div>
                 </div>
-                <div class="stat-item">
-                    <span class="stat-label">Изображений</span>
-                    <span id="statImages" class="stat-value">0</span>
-                </div>
-                <div class="stat-item">
-                    <span class="stat-label">Проанализировано</span>
-                    <span id="statAnalyzed" class="stat-value">0</span>
-                </div>
-            </div>
 
-            <div class="sidebar-section">
-                <h3 class="sidebar-title">Каналы</h3>
-                <div id="channelsList" class="channels-list">
-                    <div class="loading">Загрузка...</div>
+                <div class="sidebar-section">
+                    <h3 class="sidebar-title">Каналы</h3>
+                    <div id="channelsList" class="channels-list">
+                        <div class="loading">Загрузка...</div>
+                    </div>
+                </div>
+
+                <div class="sidebar-section">
+                    <h3 class="sidebar-title">Статус задач</h3>
+                    <div class="status-item">
+                        <div class="status-label">Парсер</div>
+                        <div id="parserStatus" class="status-value">Готов</div>
+                    </div>
+                    <div class="status-item">
+                        <div class="status-label">Анализ</div>
+                        <div id="analysisStatus" class="status-value">Готов</div>
+                    </div>
+                </div>
+            </aside>
+
+            <!-- Фид креативов -->
+            <main class="feed">
+                <div class="feed-header">
+                    <h2>Креативы</h2>
+                    <div class="feed-controls">
+                        <button id="btnRefresh" class="btn btn-icon-only">
+                            <span>↻</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div id="creativesGrid" class="creatives-grid">
+                    <div class="loading">Загрузка креативов...</div>
+                </div>
+
+                <div id="loadMoreContainer" class="load-more-container" style="display: none;">
+                    <button id="btnLoadMore" class="btn btn-secondary">Загрузить еще</button>
+                </div>
+            </main>
+        </div>
+
+        <!-- Представление таблицы -->
+        <div id="tableView" class="view-container table-view">
+            <div class="table-main-container">
+                <div class="table-container">
+                    <div class="table-header">
+                        <h2>Креативы в формате таблицы</h2>
+                        <div class="table-controls">
+                            <button id="btnRefreshTable" class="btn btn-icon-only">
+                                <span>↻</span>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="table-wrapper">
+                        <table id="creativesTable" class="creatives-table">
+                            <thead>
+                                <tr>
+                                    <th>Превью</th>
+                                    <th class="sortable" data-sort="channel">
+                                        Канал <span class="sort-icon"></span>
+                                    </th>
+                                    <th class="sortable" data-sort="date">
+                                        Дата <span class="sort-icon"></span>
+                                    </th>
+                                    <th>Текст поста</th>
+                                    <th class="sortable" data-sort="views">
+                                        Просмотры <span class="sort-icon"></span>
+                                    </th>
+                                    <th class="sortable" data-sort="er">
+                                        ER% <span class="sort-icon"></span>
+                                    </th>
+                                    <th>Описание для промпта</th>
+                                    <th>Действия</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tableBody">
+                                <tr>
+                                    <td colspan="8" class="loading">Загрузка...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div id="loadMoreTableContainer" class="load-more-container" style="display: none;">
+                        <button id="btnLoadMoreTable" class="btn btn-secondary">Загрузить еще</button>
+                    </div>
                 </div>
             </div>
+        </div>
 
-            <div class="sidebar-section">
-                <h3 class="sidebar-title">Статус задач</h3>
-                <div class="status-item">
-                    <div class="status-label">Парсер</div>
-                    <div id="parserStatus" class="status-value">Готов</div>
+        <!-- Представление логов -->
+        <div id="logsView" class="view-container logs-view">
+            <div class="logs-container">
+                <div class="logs-header">
+                    <h2>Системные логи</h2>
+                    <div class="logs-controls">
+                        <div class="logs-filter">
+                            <label>Фильтр:</label>
+                            <select id="logLevelFilter" class="filter-select">
+                                <option value="">Все уровни</option>
+                                <option value="INFO">INFO</option>
+                                <option value="WARNING">WARNING</option>
+                                <option value="ERROR">ERROR</option>
+                                <option value="DEBUG">DEBUG</option>
+                            </select>
+                        </div>
+                        <button id="btnPauseLogs" class="btn btn-secondary">
+                            <span class="btn-icon">⏸️</span>
+                            Пауза
+                        </button>
+                        <button id="btnClearLogs" class="btn btn-accent">
+                            <span class="btn-icon">🗑️</span>
+                            Очистить
+                        </button>
+                    </div>
                 </div>
-                <div class="status-item">
-                    <div class="status-label">Анализ</div>
-                    <div id="analysisStatus" class="status-value">Готов</div>
+
+                <!-- Виджет статистики запусков -->
+                <div class="schedule-logs-widget">
+                    <div class="schedule-logs-header">
+                        <h3>История запусков</h3>
+                        <button id="btnRefreshScheduleLogs" class="btn btn-icon-only">
+                            <span>↻</span>
+                        </button>
+                    </div>
+                    <div id="scheduleLogsTable" class="schedule-logs-table-wrapper">
+                        <table class="schedule-logs-table">
+                            <thead>
+                                <tr>
+                                    <th>Дата и время</th>
+                                    <th>Тип</th>
+                                    <th>Статус</th>
+                                    <th>Спарсено</th>
+                                    <th>Проанализировано</th>
+                                    <th>Детали</th>
+                                </tr>
+                            </thead>
+                            <tbody id="scheduleLogsBody">
+                                <tr>
+                                    <td colspan="6" class="no-data">Нет данных о запусках</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div id="scheduleLogsLoadMore" class="schedule-logs-load-more" style="display: none;">
+                        <button id="btnLoadMoreScheduleLogs" class="btn btn-secondary">Показать еще</button>
+                    </div>
+                </div>
+
+                <div class="logs-content" id="logsContent">
+                    <div class="log-entry log-info">
+                        <span class="log-timestamp">[00:00:00]</span>
+                        <span class="log-level">INFO</span>
+                        <span class="log-message">Ожидание логов...</span>
+                    </div>
                 </div>
             </div>
-        </aside>
+        </div>
 
-        <!-- Фид креативов -->
-        <main class="feed">
-            <div class="feed-header">
-                <h2>Креативы</h2>
-                <div class="feed-controls">
-                    <button id="btnRefresh" class="btn btn-icon-only">
-                        <span>↻</span>
-                    </button>
+        <!-- Представление руководства -->
+        <div id="guideView" class="view-container guide-view">
+            <div class="guide-container">
+                <div class="guide-header">
+                    <h1>📖 Руководство по использованию Neurocreatives</h1>
+                    <p class="guide-subtitle">Автоматическая платформа для сбора и анализа рекламных креативов из Telegram</p>
+                </div>
+
+                <div class="guide-content">
+                    <section class="guide-section">
+                        <h2>🎯 Главные возможности</h2>
+                        <div class="features-grid">
+                            <div class="feature-card">
+                                <span class="feature-icon">📡</span>
+                                <h3>Автоматический сбор</h3>
+                                <p>Рекламных креативов из Telegram-каналов</p>
+                            </div>
+                            <div class="feature-card">
+                                <span class="feature-icon">🤖</span>
+                                <h3>AI-анализ изображений</h3>
+                                <p>С помощью GPT-4o mini</p>
+                            </div>
+                            <div class="feature-card">
+                                <span class="feature-icon">🖼️</span>
+                                <h3>Удобная галерея</h3>
+                                <p>Всех собранных креативов</p>
+                            </div>
+                            <div class="feature-card">
+                                <span class="feature-icon">📊</span>
+                                <h3>Таблица с фильтрами</h3>
+                                <p>Для быстрого поиска</p>
+                            </div>
+                            <div class="feature-card">
+                                <span class="feature-icon">⏰</span>
+                                <h3>Автоматическое расписание</h3>
+                                <p>Парсинга (настраивается)</p>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section class="guide-section">
+                        <h2>🚀 Основные функции</h2>
+                        
+                        <div class="guide-block">
+                            <h3>1. Галерея креативов</h3>
+                            <p>Визуальное представление всех собранных рекламных постов:</p>
+                            <ul>
+                                <li><strong>Карточки</strong> с превью изображения</li>
+                                <li><strong>Просмотры</strong> и <strong>вовлеченность (ER%)</strong> на каждой карточке</li>
+                                <li><strong>Клик на карточку</strong> открывает детальную информацию:
+                                    <ul>
+                                        <li>Полный текст поста</li>
+                                        <li>AI-описание изображения</li>
+                                        <li>Статистика (просмотры, пересылки, реакции, комментарии)</li>
+                                        <li>Ссылка на оригинальный пост в Telegram</li>
+                                    </ul>
+                                </li>
+                            </ul>
+                        </div>
+
+                        <div class="guide-block">
+                            <h3>2. Таблица</h3>
+                            <p>Табличное представление с возможностью сортировки:</p>
+                            <ul>
+                                <li>Сортировка по <strong>каналу</strong>, <strong>дате</strong>, <strong>просмотрам</strong>, <strong>ER%</strong></li>
+                                <li>Колонка <strong>"Описание для промпта"</strong> — AI-анализ изображения</li>
+                                <li>Кнопка <strong>"Открыть пост"</strong> — переход к оригиналу в Telegram</li>
+                                <li>Кнопка <strong>"Детали"</strong> — открыть полную информацию</li>
+                            </ul>
+                        </div>
+
+                        <div class="guide-block">
+                            <h3>3. Фильтры</h3>
+                            <p>Настройте фильтрацию креативов:</p>
+                            <ul>
+                                <li><strong>По каналу</strong> — выбрать конкретный Telegram-канал</li>
+                                <li><strong>По ER%</strong> — от минимального до максимального значения</li>
+                                <li><strong>По просмотрам</strong> — задать диапазон</li>
+                                <li>Подсказки: <strong>средний ER%</strong> и <strong>средние просмотры</strong> отображаются автоматически</li>
+                            </ul>
+                        </div>
+
+                        <div class="guide-block">
+                            <h3>4. Статистика</h3>
+                            <p>В боковой панели вы всегда видите:</p>
+                            <ul>
+                                <li>Общее количество постов</li>
+                                <li>Количество изображений</li>
+                                <li>Сколько изображений проанализировано AI</li>
+                                <li>Список всех каналов</li>
+                            </ul>
+                        </div>
+                    </section>
+
+                    <section class="guide-section">
+                        <h2>⚙️ Настройки</h2>
+                        <p class="section-intro">Кнопка <strong>"Настройки"</strong> в правом верхнем углу открывает модальное окно с 4 вкладками:</p>
+
+                        <div class="guide-block">
+                            <h3>Вкладка 1: Каналы</h3>
+                            <p>Управление списком Telegram-каналов для парсинга:</p>
+                            <ol>
+                                <li>Введите <strong>алиас канала</strong> (username без @)</li>
+                                <li>Каждый канал с <strong>новой строки</strong></li>
+                                <li>Примеры: <code>klientvsprav</code>, <code>trendach</code>, <code>sostav</code>, <code>durov</code></li>
+                                <li>Нажмите <strong>"Сохранить"</strong></li>
+                            </ol>
+                            <p>Парсер будет собирать посты из всех указанных каналов.</p>
+                        </div>
+
+                        <div class="guide-block">
+                            <h3>Вкладка 2: API ключ</h3>
+                            <p>Укажите ваш <strong>OpenAI API ключ</strong> для анализа изображений:</p>
+                            <ol>
+                                <li>Получите ключ на <a href="https://platform.openai.com/api-keys" target="_blank">https://platform.openai.com/api-keys</a></li>
+                                <li>Вставьте ключ в формате: <code>sk-...</code></li>
+                                <li>Нажмите <strong>"Сохранить"</strong></li>
+                            </ol>
+                            <p class="warning">⚠️ Без ключа анализ изображений работать не будет.</p>
+                        </div>
+
+                        <div class="guide-block">
+                            <h3>Вкладка 3: Промпт анализа</h3>
+                            <p>Настройте, <strong>что именно</strong> AI будет анализировать на изображениях.</p>
+                            <p><strong>Пример промпта:</strong></p>
+                            <pre><code>Опиши это изображение для создания рекламного промпта.
+Укажи:
+- Сцену и обстановку
+- Объекты на фото
+- Цветовую палитру
+- Эмоциональный посыл
+- Наличие текста
+- Тип креатива (продуктовая съемка, lifestyle, инфографика и т.д.)</code></pre>
+                            <p>Можно менять под свои нужды!</p>
+                        </div>
+
+                        <div class="guide-block">
+                            <h3>Вкладка 4: Планировщик</h3>
+                            <p>Настройте автоматический парсинг по расписанию.</p>
+                            <h4>Основные опции:</h4>
+                            <ul>
+                                <li><strong>Включить планировщик</strong> — галочка для активации</li>
+                                <li><strong>Периодичность:</strong> ежедневно, еженедельно, раз в 2 недели, ежемесячно или выбрать дни недели</li>
+                                <li><strong>Глубина парсинга:</strong> только сегодняшние посты, за последние 3 дня или с определенной даты</li>
+                                <li><strong>Время запуска:</strong> выберите время в формате HH:MM (по МСК)</li>
+                                <li><strong>Срок действия:</strong> бессрочно или до определенной даты</li>
+                            </ul>
+                        </div>
+                    </section>
+
+                    <section class="guide-section">
+                        <h2>🚀 Ручной запуск</h2>
+                        <p>В верхней панели есть 2 кнопки для ручного запуска:</p>
+
+                        <div class="guide-block">
+                            <h3>📡 Запустить парсер</h3>
+                            <ul>
+                                <li>Собирает <strong>новые посты</strong> из всех настроенных каналов</li>
+                                <li>Скачивает изображения</li>
+                                <li>Сохраняет метаданные (просмотры, дата, текст)</li>
+                            </ul>
+                        </div>
+
+                        <div class="guide-block">
+                            <h3>🔍 Запустить анализ</h3>
+                            <ul>
+                                <li>Анализирует <strong>все непроанализированные</strong> изображения</li>
+                                <li>Использует GPT-4o mini для описания</li>
+                                <li>Сохраняет результаты в базу данных</li>
+                            </ul>
+                        </div>
+
+                        <p class="note">📌 <strong>Примечание:</strong> Эти кнопки работают независимо от автоматического расписания.</p>
+                    </section>
+
+                    <section class="guide-section">
+                        <h2>💡 Полезные советы</h2>
+
+                        <div class="tips-grid">
+                            <div class="tip-card">
+                                <h4>🕐 Как часто парсить?</h4>
+                                <ul>
+                                    <li><strong>Для активных каналов:</strong> Ежедневно или каждые 3 дня</li>
+                                    <li><strong>Для архивных задач:</strong> С определенной даты + разовый запуск</li>
+                                </ul>
+                            </div>
+
+                            <div class="tip-card">
+                                <h4>⏰ Оптимальное время запуска</h4>
+                                <ul>
+                                    <li><strong>Утро (08:00-10:00):</strong> Соберете посты за ночь</li>
+                                    <li><strong>Вечер (20:00-22:00):</strong> Соберете посты за день</li>
+                                </ul>
+                            </div>
+
+                            <div class="tip-card">
+                                <h4>🎯 Работа с фильтрами</h4>
+                                <ol>
+                                    <li>Сначала посмотрите <strong>средние значения</strong> ER% и просмотров</li>
+                                    <li>Установите фильтры <strong>выше среднего</strong></li>
+                                    <li>Используйте фильтр <strong>по каналу</strong> для анализа конкретного источника</li>
+                                </ol>
+                            </div>
+
+                            <div class="tip-card">
+                                <h4>🤖 AI-анализ</h4>
+                                <ul>
+                                    <li>GPT-4o mini анализирует изображения <strong>пакетами по 20 штук</strong></li>
+                                    <li>Между запросами задержка <strong>1 секунда</strong></li>
+                                    <li>Если видите ошибки <strong>429 (rate limit)</strong> — это норма, система автоматически повторит позже</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section class="guide-section">
+                        <h2>❓ Частые вопросы</h2>
+
+                        <div class="faq-block">
+                            <h4>1. Почему некоторые посты без изображений?</h4>
+                            <p>Старые посты могли быть собраны до добавления фильтра. Сейчас парсер <strong>не сохраняет</strong> посты без изображений. Если пост без картинки — показывается заглушка.</p>
+                        </div>
+
+                        <div class="faq-block">
+                            <h4>2. Сколько каналов можно добавить?</h4>
+                            <p>Без ограничений. Но помните:</p>
+                            <ul>
+                                <li>Больше каналов = дольше парсинг</li>
+                                <li>Рекомендуется: <strong>10-30 каналов</strong></li>
+                            </ul>
+                        </div>
+
+                        <div class="faq-block">
+                            <h4>3. Как часто обновляется статистика?</h4>
+                            <p>Статистика обновляется <strong>автоматически</strong> каждые 5 секунд.</p>
+                        </div>
+
+                        <div class="faq-block">
+                            <h4>4. Можно ли скачать креативы?</h4>
+                            <p>Да! Все изображения хранятся на сервере. Клик правой кнопкой мыши → <strong>"Сохранить изображение"</strong></p>
+                        </div>
+
+                        <div class="faq-block">
+                            <h4>5. Что делать, если не работает парсер?</h4>
+                            <p>Проверьте:</p>
+                            <ol>
+                                <li><strong>API ключи настроены?</strong> (Telegram API + OpenAI API)</li>
+                                <li><strong>Каналы добавлены?</strong></li>
+                                <li><strong>Логи</strong> во вкладке "Логи" — там будет ошибка</li>
+                            </ol>
+                        </div>
+                    </section>
+
+                    <section class="guide-section success-section">
+                        <h2>🎉 Готово!</h2>
+                        <p>Теперь вы можете:</p>
+                        <ul class="success-list">
+                            <li>✅ Собирать креативы автоматически</li>
+                            <li>✅ Анализировать их с помощью AI</li>
+                            <li>✅ Фильтровать и сортировать</li>
+                            <li>✅ Использовать данные для создания контента</li>
+                        </ul>
+                        <p class="success-message"><strong>Удачи в работе! 🚀</strong></p>
+                    </section>
                 </div>
             </div>
-
-            <div id="creativesGrid" class="creatives-grid">
-                <div class="loading">Загрузка креативов...</div>
-            </div>
-
-            <div id="loadMoreContainer" class="load-more-container" style="display: none;">
-                <button id="btnLoadMore" class="btn btn-secondary">Загрузить еще</button>
-            </div>
-        </main>
+        </div>
 
         <!-- Панель деталей -->
         <aside id="detailPanel" class="detail-panel">
@@ -101,6 +564,240 @@
                 </div>
             </div>
         </aside>
+    </div>
+
+    <!-- Модальное окно настроек -->
+    <div id="settingsModal" class="modal">
+        <div class="modal-content modal-large">
+            <div class="modal-header">
+                <h2>Настройки</h2>
+                <button id="btnCloseSettingsModal" class="btn-close">✕</button>
+            </div>
+            
+            <!-- Вкладки настроек -->
+            <div class="settings-tabs">
+                <button class="settings-tab active" data-tab="channels">Каналы</button>
+                <button class="settings-tab" data-tab="telegram">Telegram API</button>
+                <button class="settings-tab" data-tab="api">OpenAI API</button>
+                <button class="settings-tab" data-tab="prompt">Промпт анализа</button>
+                <button class="settings-tab" data-tab="scheduler">Планировщик</button>
+            </div>
+            
+            <div class="modal-body" style="max-height: calc(80vh - 180px); overflow-y: auto;">
+                <!-- Вкладка: Каналы -->
+                <div id="settingsChannels" class="settings-panel active">
+                    <p class="modal-description">
+                        Введите алиасы каналов (username без @), каждый с новой строки:
+                    </p>
+                    <textarea
+                        id="channelsTextarea"
+                        class="channels-textarea"
+                        placeholder="klientvsprav&#10;trendach&#10;sostav&#10;durov"
+                        rows="12"
+                    ></textarea>
+                    <div class="modal-info">
+                        <span id="channelsCount">0</span> каналов
+                    </div>
+                </div>
+
+                <!-- Вкладка: Telegram API -->
+                <div id="settingsTelegram" class="settings-panel">
+                    <p class="modal-description">
+                        Введите ваши Telegram API ключи для парсинга каналов. 
+                        Получите их на <a href="https://my.telegram.org" target="_blank">my.telegram.org</a>
+                    </p>
+                    <div class="form-group" style="margin-bottom: 16px;">
+                        <label class="form-label">API ID:</label>
+                        <input
+                            type="text"
+                            id="telegramApiIdInput"
+                            class="settings-input"
+                            placeholder="12345678"
+                        />
+                    </div>
+                    <div class="form-group" style="margin-bottom: 16px;">
+                        <label class="form-label">API Hash:</label>
+                        <input
+                            type="password"
+                            id="telegramApiHashInput"
+                            class="settings-input"
+                            placeholder="abc123def456..."
+                        />
+                        <button id="btnToggleTgApiHash" class="btn-toggle-password">👁️ Показать</button>
+                    </div>
+                    <div class="form-group" style="margin-bottom: 16px;">
+                        <label class="form-label">Сессия Telegram:</label>
+                        <div style="margin-top: 8px;">
+                            <button id="btnResetTgSession" class="btn btn-accent">
+                                🗑️ Сбросить сессию
+                            </button>
+                        </div>
+                        <div class="modal-info" style="margin-top: 8px;">
+                            ⚠️ Если ошибка "authorization key was used under two different IP addresses" — 
+                            сбросьте сессию и запустите парсер заново.
+                        </div>
+                    </div>
+                    <div class="modal-info">
+                        API ключи сохраняются в базе данных
+                    </div>
+                </div>
+
+                <!-- Вкладка: OpenAI API ключ -->
+                <div id="settingsAPI" class="settings-panel">
+                    <p class="modal-description">
+                        Введите ваш API ключ OpenAI для анализа изображений:
+                    </p>
+                    <input
+                        type="password"
+                        id="apiKeyInput"
+                        class="settings-input"
+                        placeholder="sk-..."
+                    />
+                    <button id="btnToggleApiKey" class="btn-toggle-password">👁️ Показать</button>
+                    <div class="modal-info">
+                        Ключ будет храниться в базе данных
+                    </div>
+                </div>
+
+                <!-- Вкладка: Промпт анализа -->
+                <div id="settingsPrompt" class="settings-panel">
+                    <p class="modal-description">
+                        Настройте промпт для анализа изображений AI:
+                    </p>
+                    <textarea
+                        id="promptTextarea"
+                        class="prompt-textarea"
+                        placeholder="Что на этом фото?"
+                        rows="8"
+                    ></textarea>
+                    <div class="modal-info">
+                        Промпт будет использоваться при анализе всех изображений
+                    </div>
+                </div>
+
+                <!-- Вкладка: Планировщик -->
+                <div id="settingsScheduler" class="settings-panel">
+                    <p class="modal-description">
+                        Настройте автоматический запуск парсинга и анализа по расписанию:
+                    </p>
+                    
+                    <div class="scheduler-section">
+                        <div class="scheduler-toggle">
+                            <label class="checkbox-container">
+                                <input type="checkbox" id="scheduleEnabled">
+                                <span class="checkbox-label">Включить планировщик</span>
+                            </label>
+                        </div>
+
+                        <div id="scheduleSettings" class="schedule-settings">
+                            <div class="form-group">
+                                <label class="form-label">Периодичность:</label>
+                                <select id="scheduleFrequency" class="settings-input">
+                                    <option value="every_5_minutes">Каждые 5 минут (для тестирования)</option>
+                                    <option value="daily">Ежедневно</option>
+                                    <option value="weekly">Еженедельно (понедельник)</option>
+                                    <option value="biweekly">Раз в 2 недели (понедельник)</option>
+                                    <option value="monthly">Ежемесячно (1 число)</option>
+                                    <option value="custom">Выбрать дни недели</option>
+                                </select>
+                            </div>
+
+                            <div id="customDaysGroup" class="form-group" style="display: none;">
+                                <label class="form-label">Дни недели:</label>
+                                <div class="days-checkboxes">
+                                    <label class="day-checkbox">
+                                        <input type="checkbox" value="0" class="schedule-day">
+                                        <span>Пн</span>
+                                    </label>
+                                    <label class="day-checkbox">
+                                        <input type="checkbox" value="1" class="schedule-day">
+                                        <span>Вт</span>
+                                    </label>
+                                    <label class="day-checkbox">
+                                        <input type="checkbox" value="2" class="schedule-day">
+                                        <span>Ср</span>
+                                    </label>
+                                    <label class="day-checkbox">
+                                        <input type="checkbox" value="3" class="schedule-day">
+                                        <span>Чт</span>
+                                    </label>
+                                    <label class="day-checkbox">
+                                        <input type="checkbox" value="4" class="schedule-day">
+                                        <span>Пт</span>
+                                    </label>
+                                    <label class="day-checkbox">
+                                        <input type="checkbox" value="5" class="schedule-day">
+                                        <span>Сб</span>
+                                    </label>
+                                    <label class="day-checkbox">
+                                        <input type="checkbox" value="6" class="schedule-day">
+                                        <span>Вс</span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">Глубина парсинга:</label>
+                                <select id="parseDepth" class="settings-input">
+                                    <option value="today">Только сегодняшние посты</option>
+                                    <option value="3days">За последние 3 дня</option>
+                                    <option value="from_date">С определенной даты</option>
+                                </select>
+                            </div>
+
+                            <div id="parseFromDateGroup" class="form-group" style="display: none;">
+                                <label class="form-label">Дата начала парсинга:</label>
+                                <input type="date" id="parseFromDate" class="settings-input">
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">Время запуска (МСК):</label>
+                                <input type="time" id="scheduleTime" class="settings-input" value="08:00">
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">Срок действия:</label>
+                                <div class="radio-group">
+                                    <label class="radio-container">
+                                        <input type="radio" name="scheduleEndType" value="indefinite" checked>
+                                        <span class="radio-label">Бессрочно</span>
+                                    </label>
+                                    <label class="radio-container">
+                                        <input type="radio" name="scheduleEndType" value="until_date">
+                                        <span class="radio-label">До даты</span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div id="endDateGroup" class="form-group" style="display: none;">
+                                <label class="form-label">Дата окончания:</label>
+                                <input type="date" id="scheduleEndDate" class="settings-input">
+                            </div>
+
+                            <div class="schedule-status">
+                                <div class="status-indicator">
+                                    <span class="status-label">Статус:</span>
+                                    <span id="schedulerStatus" class="status-badge">Не запущен</span>
+                                </div>
+                                <div id="nextRunInfo" class="next-run-info" style="display: none;">
+                                    <span class="next-run-label">Следующий запуск:</span>
+                                    <span id="nextRunTime" class="next-run-time"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="modal-info">
+                        Все настройки применяются к таймзоне Europe/Moscow (МСК, UTC+3)
+                    </div>
+                </div>
+            </div>
+            
+            <div class="modal-footer">
+                <button id="btnCancelSettings" class="btn btn-secondary">Отмена</button>
+                <button id="btnSaveSettings" class="btn btn-primary">Сохранить</button>
+            </div>
+        </div>
     </div>
 
     <script src="/static/app.js"></script>

@@ -19,6 +19,7 @@ build/
 # Environment
 .env
 .env.local
+.env.production
 
 # IDE
 .vscode/
@@ -50,3 +51,12 @@ docker-compose.override.yml
 # Backups
 *.backup
 *.bak
+backups/
+*.tar.gz
+
+# Temp files
+app_js_patch_final.txt
+screenshot_scheduler.png
+SELECT id,.sql
+check_images.py
+clean_posts_without_images.py

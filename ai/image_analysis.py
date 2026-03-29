@@ -1,21 +1,41 @@
 import os
 import base64
 import json
+import time
 from openai import OpenAI
 from typing import Dict, Optional
+import httpx
 
-from db.models import Image, Analysis
+from db.models import Image, Analysis, Settings
 from db.database import get_database
 
 
 class ImageAnalyzer:
     """Анализатор изображений с помощью OpenAI Vision."""
     
-    def __init__(self, api_key: str):
-        self.client = OpenAI(api_key=api_key)
+    def __init__(self, api_key: str = None):
+        # Если API ключ не передан, получаем из БД
+        if api_key is None:
+            api_key = self._get_setting('openai_api_key')
+            if not api_key:
+                raise ValueError("OpenAI API ключ не настроен. Добавьте его в настройках.")
+        
+        # Создаем чистый http_client без параметра proxies
+        try:
+            http_client = httpx.Client()
+            self.client = OpenAI(api_key=api_key, http_client=http_client)
+        except Exception as e:
+            print(f"❌ Ошибка создания OpenAI клиента: {e}")
+            raise
+        
         self.model = "gpt-4o-mini"
         
-        self.system_prompt = """You are analyzing an advertising creative.
+        # Получаем кастомный промпт из БД или используем дефолтный
+        custom_prompt = self._get_setting('analysis_prompt')
+        
+        self.system_prompt = f"""You are analyzing an advertising creative.
+
+{custom_prompt if custom_prompt else 'Что на этом фото?'}
 
 Return JSON with:
 - type: тип креатива (баннер, сторис, пост и т.д.)
@@ -27,6 +47,17 @@ Return JSON with:
 - visual_strength_score: оценка визуальной силы от 1 до 10
 
 Be concise. Answer in Russian."""
+    
+    def _get_setting(self, key: str) -> Optional[str]:
+        """Получение настройки из БД."""
+        try:
+            db = get_database()
+            with db.get_session() as session:
+                setting = session.query(Settings).filter(Settings.key == key).first()
+                return setting.value if setting else None
+        except Exception as e:
+            print(f"  ⚠️  Не удалось получить настройку {key}: {e}")
+            return None
     
     def analyze_image(self, image_path: str) -> Optional[Dict]:
         """
@@ -144,6 +175,11 @@ Be concise. Answer in Russian."""
                     print(f"  ✓ Анализ сохранен")
                 else:
                     print(f"  ⚠️  Не удалось проанализировать")
+                
+                # Задержка между запросами для соблюдения rate limit
+                # 0.6 сек = ~100 запросов/мин, что в 2 раза меньше лимита (~200 запросов/мин)
+                if idx < total:  # Не ждем после последнего запроса
+                    time.sleep(0.6)
             
             print(f"\n✓ Анализ завершен: {analyzed}/{total} изображений")
             return analyzed

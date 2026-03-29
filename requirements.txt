@@ -14,5 +14,8 @@ telethon==1.34.0
 # AI / OpenAI
 openai==1.10.0
 
+# Scheduler
+apscheduler==3.10.4
+
 # Utilities
 python-dotenv==1.0.0

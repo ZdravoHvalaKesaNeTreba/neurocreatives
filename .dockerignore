@@ -1,0 +1,66 @@
+# Backups (huge files!)
+backups/
+
+# Git
+.git/
+.github/
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+env/
+ENV/
+*.egg-info/
+
+# Database sessions
+*.session
+*.db
+*.sqlite
+
+# Environment files (secrets)
+.env
+.env.local
+.env.production
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Downloads (mounted as volume)
+downloads/*
+
+# Documentation (but keep requirements.txt)
+*.md
+*.sql
+app_js_patch_final.txt
+
+# Screenshots and large images in root
+screenshot_scheduler.png
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Docker
+docker-compose.yml
+docker-compose.override.yml
+
+# Deploy scripts
+deploy/
+
+# Archives
+*.zip
+*.tar.gz
+*.backup
+*.bak
+
+# Logs
+*.log
+
+# Misc
+check_images.py
+clean_posts_without_images.py

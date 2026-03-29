@@ -10,6 +10,7 @@ services:
       - TELEGRAM_API_HASH=${TELEGRAM_API_HASH}
       - OPENAI_API_KEY=${OPENAI_API_KEY}
       - DATABASE_URL=${DATABASE_URL}
+      - CHANNELS_TO_PARSE=${CHANNELS_TO_PARSE}
     volumes:
       - ./downloads:/app/downloads
       - ./parser_session.session:/app/parser_session.session

@@ -4,7 +4,7 @@ from contextlib import contextmanager
 from typing import Generator
 import os
 
-from db.models import Base
+from db.models import Base, Settings
 
 
 class Database:
@@ -53,6 +53,8 @@ def init_database(db_url: str = None):
     # Заменяем postgresql:// на postgresql+psycopg:// для использования psycopg3
     if db_url.startswith('postgresql://'):
         db_url = db_url.replace('postgresql://', 'postgresql+psycopg://')
+    elif db_url.startswith('postgresql+psycopg://'):
+        pass  # Already correct format
     _db_instance = Database(db_url)
     return _db_instance
 
@@ -70,3 +72,27 @@ def get_db_session() -> Generator[Session, None, None]:
     db = get_database()
     with db.get_session() as session:
         yield session
+
+
+def init_default_settings():
+    """Инициализация настроек по умолчанию."""
+    db = get_database()
+    with db.get_session() as session:
+        # Проверяем, есть ли уже настройки
+        existing_settings = session.query(Settings).first()
+        if existing_settings:
+            print("✓ Настройки уже существуют")
+            return
+        
+        # Создаем настройки по умолчанию
+        # API ключ OpenAI берётся из переменной окружения
+        default_api_key = os.getenv('OPENAI_API_KEY', '')
+        
+        default_settings = [
+            Settings(key='openai_api_key', value=default_api_key),
+            Settings(key='analysis_prompt', value='Что на этом фото?'),
+        ]
+        
+        session.add_all(default_settings)
+        session.commit()
+        print("✓ Настройки по умолчанию созданы")

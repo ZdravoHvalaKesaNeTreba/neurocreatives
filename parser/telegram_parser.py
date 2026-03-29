@@ -1,6 +1,6 @@
 import os
 import asyncio
-from datetime import date
+from datetime import date, datetime, timedelta
 from telethon.sync import TelegramClient
 from sqlalchemy.orm import Session
 
@@ -17,14 +17,15 @@ class TelegramParser:
         self.session_name = session_name
         self.downloads_folder = 'downloads'
     
-    async def parse_channels(self, channels: list, limit: int = 100, today_only: bool = True):
+    async def parse_channels(self, channels: list, limit: int = 100, parse_depth: str = 'today', parse_from_date: str = None):
         """
         Парсинг списка каналов.
         
         Args:
             channels: Список каналов для парсинга
             limit: Максимальное количество сообщений для проверки
-            today_only: Парсить только сегодняшние посты
+            parse_depth: Глубина парсинга ('today', '3days', 'from_date')
+            parse_from_date: Дата начала парсинга (формат: YYYY-MM-DD), используется если parse_depth='from_date'
         
         Returns:
             Количество собранных постов
@@ -37,9 +38,28 @@ class TelegramParser:
             # Создаем папку для загрузок
             os.makedirs(self.downloads_folder, exist_ok=True)
             
+            # Определяем границу дат на основе parse_depth
             today = date.today()
-            total_posts = 0
+            cutoff_date = None
             
+            if parse_depth == 'today':
+                cutoff_date = today
+                print(f"📅 Парсинг за сегодня ({today})")
+            elif parse_depth == '3days':
+                cutoff_date = today - timedelta(days=3)
+                print(f"📅 Парсинг за последние 3 дня (с {cutoff_date})")
+            elif parse_depth == 'from_date' and parse_from_date:
+                try:
+                    cutoff_date = datetime.strptime(parse_from_date, '%Y-%m-%d').date()
+                    print(f"📅 Парсинг с {cutoff_date}")
+                except ValueError:
+                    cutoff_date = today
+                    print(f"⚠️  Неверный формат даты, используется сегодня ({today})")
+            else:
+                cutoff_date = today
+                print(f"📅 Парсинг за сегодня ({today})")
+            
+            total_posts = 0
             db = get_database()
             
             for channel_name in channels:
@@ -52,11 +72,20 @@ class TelegramParser:
                     
                     async for message in client.iter_messages(channel, limit=limit):
                         # Проверяем дату
-                        if today_only and message.date.date() != today:
-                            if message.date.date() < today:
-                                print(f"  ⏸️  Достигнуты вчерашние посты")
+                        message_date = message.date.date()
+                        
+                        if parse_depth == 'today':
+                            # Только сегодняшние посты
+                            if message_date != today:
+                                if message_date < today:
+                                    print(f"  ⏸️  Достигнуты вчерашние посты")
+                                    break
+                                continue
+                        else:
+                            # За период (3 дня или с определенной даты)
+                            if message_date < cutoff_date:
+                                print(f"  ⏸️  Достигнут лимит дат ({cutoff_date})")
                                 break
-                            continue
                         
                         # Проверяем наличие текста и фото
                         if message.text and message.photo:

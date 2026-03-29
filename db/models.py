@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, DateTime, Float, ForeignKey, Text
+from sqlalchemy import Column, Integer, String, DateTime, Float, ForeignKey, Text, Boolean, Date
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 from datetime import datetime
@@ -56,3 +56,26 @@ class Analysis(Base):
     
     # Relationships
     image = relationship("Image", back_populates="analysis")
+
+
+class Settings(Base):
+    __tablename__ = 'settings'
+    
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    key = Column(String(255), unique=True, nullable=False)
+    value = Column(Text)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+
+class ScheduleLog(Base):
+    __tablename__ = 'schedule_logs'
+    
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    timestamp = Column(DateTime, default=datetime.utcnow, nullable=False)
+    run_type = Column(String(20), default='auto', nullable=False)  # auto/manual
+    status = Column(String(50), nullable=False)  # success/error
+    images_parsed = Column(Integer, default=0)
+    images_analyzed = Column(Integer, default=0)
+    error_message = Column(Text)
+    created_at = Column(DateTime, default=datetime.utcnow)
