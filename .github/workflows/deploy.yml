@@ -20,8 +20,17 @@ jobs:
         username: yc-user
         key: ${{ secrets.YC_SSH_KEY }}
         script: |
+          set -e
           cd /apps/neurocreatives
-          git pull origin main
+          
+          # Принудительное обновление кода (сброс локальных изменений)
+          git fetch origin main
+          git reset --hard origin/main
+          git clean -fd \
+            -e 'parser_session.session' \
+            -e 'parser_session.session-journal' \
+            -e '.env' \
+            -e 'downloads/'
           
           # Остановка всего на порту 8000
           docker compose down --remove-orphans 2>/dev/null || true
@@ -33,7 +42,6 @@ jobs:
           sleep 2
           
           # Сборка и запуск
-          set -e
           docker compose build --no-cache
           docker compose up -d
           docker system prune -f
