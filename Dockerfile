@@ -55,11 +55,11 @@ COPY --chown=appuser:appuser . .
 USER appuser
 
 # Переменные окружения по умолчанию (переопределяются через --env / --env-file)
+# PGSSLROOTCERT — путь к CA-сертификату Yandex Cloud (используется psycopg/libpq)
 ENV PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1 \
     HOST=0.0.0.0 \
     PORT=8000 \
-    # Путь к CA-сертификату Yandex Cloud (используется psycopg/libpq)
     PGSSLROOTCERT=/usr/local/share/ca-certificates/yandex/YandexInternalRootCA.crt
 
 EXPOSE 8000
