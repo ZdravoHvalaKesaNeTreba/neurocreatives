@@ -29,6 +29,24 @@ app = FastAPI(
     version="1.0.0"
 )
 
+
+def resolve_image_path(file_path: str | None) -> str:
+    """
+    Определяет URL для изображения:
+    - если файл существует локально → возвращает локальный путь (e.g. downloads/photo.jpg)
+    - если задан REMOTE_IMAGES_BASE_URL и файла нет локально → возвращает полный URL на удалённый сервер
+    - иначе → placeholder
+    """
+    if file_path and os.path.exists(file_path):
+        return file_path
+
+    remote_base = config.REMOTE_IMAGES_BASE_URL
+    if remote_base and file_path:
+        # Убираем trailing slash у base и leading slash у path
+        return f"{remote_base.rstrip('/')}/{file_path.lstrip('/')}"
+
+    return "/static/placeholder.png"
+
 # Обработчик ошибок валидации
 @app.exception_handler(RequestValidationError)
 async def validation_exception_handler(request: Request, exc: RequestValidationError):
@@ -198,7 +216,7 @@ async def get_creatives(
             img = post.images[0]
             image_data = {
                 "id": img.id,
-                "file_path": img.file_path if img.file_path and os.path.exists(img.file_path) else "/static/placeholder.png"
+                "file_path": resolve_image_path(img.file_path)
             }
             
             if img.analysis:
@@ -255,7 +273,7 @@ async def get_creative(creative_id: int, db: Session = Depends(get_db_session)):
         for img in post.images:
             image_item = {
                 "id": img.id,
-                "file_path": img.file_path if img.file_path and os.path.exists(img.file_path) else "/static/placeholder.png",
+                "file_path": resolve_image_path(img.file_path),
                 "analysis": None
             }
             

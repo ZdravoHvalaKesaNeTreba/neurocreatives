@@ -1,11 +1,8 @@
-# Backups (huge files!)
-backups/
-
-# Git
+# === Git ===
 .git/
 .github/
 
-# Python cache
+# === Python cache ===
 __pycache__/
 *.py[cod]
 *$py.class
@@ -13,54 +10,58 @@ venv/
 env/
 ENV/
 *.egg-info/
+.mypy_cache/
+.pytest_cache/
 
-# Database sessions
+# === Database sessions / local DBs ===
 *.session
 *.db
 *.sqlite
 
-# Environment files (secrets)
+# === Environment files (secrets — передаются через --env-file) ===
 .env
-.env.local
-.env.production
+.env.*
 
-# IDE
+# === IDE ===
 .vscode/
 .idea/
 *.swp
 *.swo
 
-# Downloads (mounted as volume)
+# === Downloads (монтируется как volume) ===
 downloads/*
+!downloads/.gitkeep
 
-# Documentation (but keep requirements.txt)
+# === Documentation ===
 *.md
 *.sql
-app_js_patch_final.txt
 
-# Screenshots and large images in root
-screenshot_scheduler.png
-
-# OS
-.DS_Store
-Thumbs.db
-
-# Docker
-docker-compose.yml
-docker-compose.override.yml
-
-# Deploy scripts
-deploy/
-
-# Archives
+# === Backup / Archives ===
+backups/
 *.zip
 *.tar.gz
 *.backup
 *.bak
 
-# Logs
+# === Screenshots / large images in root ===
+screenshot_scheduler.png
+
+# === OS ===
+.DS_Store
+Thumbs.db
+
+# === Docker configs (не нужны внутри образа) ===
+Dockerfile
+Dockerfile.*
+docker-compose*.yml
+
+# === Deploy scripts ===
+deploy/
+
+# === Logs ===
 *.log
 
-# Misc
+# === Utility scripts ===
 check_images.py
 clean_posts_without_images.py
+app_js_patch_final.txt

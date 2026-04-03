@@ -551,7 +551,7 @@ function renderCreatives() {
         
         return `
             <div class="creative-card" onclick="openCreativeDetail(${creative.id})">
-                <img src="/${imagePath}" alt="${creative.channel}" class="creative-image" 
+                <img src="${resolveImageUrl(imagePath)}" alt="${creative.channel}" class="creative-image" 
                      onerror="this.src='/static/placeholder.png'">
                 <div class="creative-content">
                     <div class="creative-channel">${creative.channel}</div>
@@ -596,7 +596,7 @@ async function openCreativeDetail(creativeId) {
         const analysis = image?.analysis;
         
         content.innerHTML = `
-            <img src="/${image.file_path}" alt="${creative.channel}" class="detail-image"
+            <img src="${resolveImageUrl(image.file_path)}" alt="${creative.channel}" class="detail-image"
                  onerror="this.src='/static/placeholder.png'">
             
             <div class="detail-section">
@@ -771,6 +771,19 @@ async function runAnalysis() {
 }
 
 // Утилиты
+
+/**
+ * Преобразует file_path из API в пригодный для <img src> URL.
+ * Если path — абсолютный URL (http/https), возвращает как есть.
+ * Иначе добавляет ведущий «/» для относительного пути.
+ */
+function resolveImageUrl(path) {
+    if (!path) return '/static/placeholder.png';
+    if (path.startsWith('http://') || path.startsWith('https://')) return path;
+    // Убираем двойной leading slash если он уже есть
+    return '/' + path.replace(/^\/+/, '');
+}
+
 function truncateText(text, maxLength) {
     if (!text) return '';
     if (text.length <= maxLength) return text;
@@ -1063,9 +1076,10 @@ function renderTableRows(creatives, append = false) {
             ? generatePromptDescription(creative)
             : 'Анализ не выполнен';
         
+        const resolvedImageUrl = resolveImageUrl(imagePath);
         row.innerHTML = `
             <td class="table-cell-image">
-                <img src="/${imagePath}" alt="${creative.channel}" 
+                <img src="${resolvedImageUrl}" alt="${creative.channel}" 
                      onerror="this.src='/static/placeholder.png'">
             </td>
             <td class="table-cell-channel">${creative.channel}</td>
@@ -1079,7 +1093,7 @@ function renderTableRows(creatives, append = false) {
                 <div class="table-text-content">${promptDescription}</div>
             </td>
             <td class="table-cell-actions">
-                <button class="btn-table-action" onclick="event.stopPropagation(); downloadImage('/${imagePath}', '${creative.channel}_${creative.id}')">
+                <button class="btn-table-action" onclick="event.stopPropagation(); downloadImage('${resolvedImageUrl}', '${creative.channel}_${creative.id}')">
                     💾 Скачать
                 </button>
                 <button class="btn-table-action" onclick="event.stopPropagation(); copyPromptDescription(\`${promptDescription.replace(/`/g, '\\`')}\`)">

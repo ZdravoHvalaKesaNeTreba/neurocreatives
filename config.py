@@ -25,3 +25,8 @@ DATABASE_URL = os.getenv('DATABASE_URL', 'postgresql://user1:XXXXXXXXXXX@rc1b-re
 # --- Настройки сервера ---
 HOST = os.getenv('HOST', '0.0.0.0')
 PORT = int(os.getenv('PORT', '8000'))
+
+# --- Удалённый сервер с картинками ---
+# Если задан, локально отсутствующие картинки будут загружаться с этого URL
+# Пример: https://your-server.example.com  (без trailing slash)
+REMOTE_IMAGES_BASE_URL = os.getenv('REMOTE_IMAGES_BASE_URL', 'https://neurocreatives.maksimprojects.space')
